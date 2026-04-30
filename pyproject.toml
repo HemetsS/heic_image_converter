@@ -11,7 +11,7 @@ classifiers = [
     "Environment :: Win32 (MS Windows)",
     "Environment :: X11 Applications",
     "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: AGPL-3.0-or-later",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
