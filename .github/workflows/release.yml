@@ -35,43 +35,41 @@ jobs:
           pyinstaller app.py --onefile --name heic-converter-gui
         shell: bash
 
-      - name: Rename artifact
-        run: |
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            mv dist/heic-converter-gui.exe heic-converter-gui-windows.exe
-          else
-            mv dist/heic-converter-gui heic-converter-gui-linux
-          fi
-        shell: bash
-
-      - name: Upload build artifact
+      # Upload only the correct binary per OS
+      - name: Upload build artifact (Linux)
+        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: heic-converter-gui-${{ matrix.os }}
-          path: |
-            dist/heic-converter-gui-windows.exe
-            dist/heic-converter-gui-linux
+          name: heic-converter-gui-linux
+          path: dist/heic-converter-gui
+
+      - name: Upload build artifact (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: heic-converter-gui-windows
+          path: dist/heic-converter-gui.exe
 
   release:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifacts
+      - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
-          name: heic-converter-gui-ubuntu-latest
+          name: heic-converter-gui-linux
           path: artifacts/
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          name: heic-converter-gui-windows-latest
+          name: heic-converter-gui-windows
           path: artifacts/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/**/heic-converter-gui-windows.exe
-            artifacts/**/heic-converter-gui-linux
+            artifacts/heic-converter-gui-windows.exe
+            artifacts/heic-converter-gui-linux
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
