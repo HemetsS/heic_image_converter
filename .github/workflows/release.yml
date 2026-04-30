@@ -47,7 +47,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }}-binary
+          name: heic-converter-gui-${{ matrix.os }}
           path: |
             dist/heic-converter-gui-windows.exe
             dist/heic-converter-gui-linux
@@ -59,7 +59,13 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          name: heic-converter-gui-ubuntu-latest
+          path: artifacts/
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: heic-converter-gui-windows-latest
+          path: artifacts/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
