@@ -23,7 +23,6 @@ to JPEG, PNG, or WebP.
 ### Smart conversion
 - **Preserves EXIF + ICC color profile** by default
 - **Auto-rotate** using EXIF orientation, then strips the orientation tag so every viewer shows it correctly
-- **Live Photo support** — copies the `.MOV` companion next to the converted image (no conversion, no deletion)
 - **Organize by capture date** — optionally place outputs in `YYYY/YYYY-MM-DD/` subfolders read from EXIF
 - **Conflict policy** — *skip* / *overwrite* / *rename with suffix*
 - **Verify pass** — re-opens every output to confirm it decodes and matches expected dimensions
@@ -76,7 +75,7 @@ uv run heic-converter-gui
    - **Output format / quality** — JPEG quality 92 is a great default
    - **Output location** — *Same folder as original* OR *Custom folder*
    - **If output exists** — *skip* / *overwrite* / *rename*
-   - Toggles: Preserve EXIF, Auto-rotate, Organize by capture date, Copy Live Photo `.MOV`, Verify, Hash cache, Dry run, Write log
+   - Toggles: Preserve EXIF, Auto-rotate, Organize by capture date, Verify, Hash cache, Dry run, Write log
    - **Parallel workers** — 4 is a good default; raise on fast SSDs with many cores
 4. **Start** — watch progress, ok/skip/err counts, and ETA. Cancel anytime.
 

@@ -62,7 +62,6 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Place outputs in YYYY/YYYY-MM-DD/ subfolders based on EXIF capture date.")
     p.add_argument("--no-exif", action="store_true", help="Strip EXIF metadata.")
     p.add_argument("--no-rotate", action="store_true", help="Disable EXIF auto-rotate.")
-    p.add_argument("--no-live", action="store_true", help="Don't copy Live Photo .MOV companions.")
     p.add_argument("--no-verify", action="store_true", help="Skip post-write verify pass.")
     p.add_argument("--no-cache", action="store_true", help="Disable hash-based skip cache.")
     p.add_argument("--no-log", action="store_true", help="Don't write a conversion-log.txt.")
@@ -92,7 +91,6 @@ def main(argv: list[str] | None = None) -> int:
         keep_exif=not args.no_exif,
         auto_rotate=not args.no_rotate,
         organize_by_date=args.organize_by_date,
-        copy_live_photo=not args.no_live,
         verify_after=not args.no_verify,
         use_hash_cache=not args.no_cache,
         conflict_policy=ConflictPolicy(args.on_conflict),

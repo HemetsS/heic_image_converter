@@ -11,7 +11,6 @@ Features:
     * Optional EXIF-date based foldering ("YYYY/YYYY-MM-DD/IMG_xxxx.jpg").
     * Conflict policy: skip / overwrite / rename-with-suffix.
     * Idempotent re-runs via SHA-256 cache stored next to the output root.
-    * Live Photo (.MOV) companion files copied alongside if present.
     * Verify pass: re-opens each output to confirm decodability + dimensions.
     * Dry-run mode: no files written.
     * Per-output log file written into the output root.
@@ -22,7 +21,6 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import shutil
 import time
 from concurrent.futures import ThreadPoolExecutor, Future
 from dataclasses import dataclass
@@ -38,7 +36,6 @@ import pillow_heif
 pillow_heif.register_heif_opener()
 
 HEIC_EXTENSIONS = {".heic", ".heif"}
-LIVE_PHOTO_EXTENSIONS = {".mov", ".MOV"}
 
 # label -> (PIL format, default extension, supports_quality, default save kwargs)
 SUPPORTED_FORMATS: dict[str, tuple[str, str, bool, dict]] = {
@@ -99,7 +96,6 @@ class ConverterConfig:
     keep_exif: bool = True
     auto_rotate: bool = True
     organize_by_date: bool = False  # YYYY/YYYY-MM-DD/ subfolders
-    copy_live_photo: bool = True
     verify_after: bool = True
     use_hash_cache: bool = True
 
@@ -124,15 +120,6 @@ def find_heic_files(root: Path) -> list[Path]:
         if p.is_file() and p.suffix.lower() in HEIC_EXTENSIONS:
             out.append(p)
     return out
-
-
-def find_live_photo_companion(heic: Path) -> Optional[Path]:
-    """Apple Live Photos store IMG_1234.HEIC + IMG_1234.MOV side by side."""
-    for ext in LIVE_PHOTO_EXTENSIONS:
-        candidate = heic.with_suffix(ext)
-        if candidate.exists() and candidate.is_file():
-            return candidate
-    return None
 
 
 # ---------------------------------------------------------------------------
@@ -356,18 +343,6 @@ def _convert_one(
                 if logger:
                     logger.error("VERIFY-FAIL %s: %s", out_path, e)
                 return item
-
-        # Live Photo companion .MOV -> copy alongside (never moved/deleted).
-        if cfg.copy_live_photo:
-            mov = find_live_photo_companion(item.source)
-            if mov is not None:
-                mov_dest = out_path.with_suffix(mov.suffix)
-                if not mov_dest.exists() or cfg.conflict_policy == ConflictPolicy.OVERWRITE:
-                    try:
-                        shutil.copy2(mov, mov_dest)
-                    except OSError as e:
-                        if logger:
-                            logger.warning("Live Photo copy failed for %s: %s", mov, e)
 
         item.status = "done"
         item.message = str(out_path)
