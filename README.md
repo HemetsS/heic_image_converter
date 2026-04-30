@@ -103,6 +103,12 @@ You can also call the module directly: `uv run python cli.py …`.
 - [cli.py](cli.py) — Command-line interface using the same engine
 - [pyproject.toml](pyproject.toml) — uv / PEP 621 project metadata + dependencies
 
+## Screenshots
+
+![Main GUI](https://raw.githubusercontent.com/yourusername/heic-image-converter/main/docs/screenshot-main.png)
+
+*Add more screenshots or GIFs to showcase features and UI.*
+
 ## Notes & caveats
 
 - The hash cache and the run log are written into the output root
@@ -113,17 +119,14 @@ You can also call the module directly: `uv run python cli.py …`.
 - Hardware-accelerated HEIC decoding is provided automatically by `pillow-heif`
   (which links `libheif` + `libde265`); no extra setup needed on Windows or Linux.
 
-## Packaging suggestions
+## Troubleshooting
 
-To distribute to non-developers:
+- **Tkinter errors on Linux**: Make sure you have `python3-tk` installed (`sudo apt install python3-tk`).
+- **Drag & drop not working**: Ensure you are running the app with a supported Python version and have all dependencies installed. On Linux, some desktop environments may not support TkinterDnD2.
+- **Missing GUI elements or crashes**: Try updating all dependencies with `uv pip install --system --upgrade .`.
+- **Permission errors**: Make sure you have write access to the output directory.
 
-- **Windows**: build a self-contained `.exe` with PyInstaller (already declared
-  as a dev dependency in [pyproject.toml](pyproject.toml)):
-  ```powershell
-  uv sync --group dev
-  uv run pyinstaller --noconfirm --windowed --name HeicConverter app.py
-  ```
-- **Linux**: ship an AppImage (e.g. via [`python-appimage`](https://github.com/niess/python-appimage))
-  or a Flatpak so users don't need to install Python or Tk.
-- Sign the Windows binary to avoid SmartScreen warnings.
+## Contributing
+
+Contributions are welcome! Please open issues or pull requests. See the [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines (or create one if you want to accept contributions).
 

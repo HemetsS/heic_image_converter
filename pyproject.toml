@@ -4,7 +4,7 @@ version = "0.2.0"
 description = "Cross-platform GUI + CLI tool to convert Apple HEIC/HEIF images to JPEG/PNG/WebP. Originals are never modified."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = { text = "AGPL-3.0-or-later" }
 authors = [{ name = "HEIC Converter contributors" }]
 keywords = ["heic", "heif", "image", "converter", "jpeg", "webp", "tkinter", "gui"]
 classifiers = [

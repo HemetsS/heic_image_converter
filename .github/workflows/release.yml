@@ -1,0 +1,72 @@
+name: Build and Release Binaries
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: |
+          pip install uv
+
+      - name: Install dependencies
+        run: |
+          uv pip install --system .
+
+      - name: Build executable (PyInstaller)
+        run: |
+          pip install pyinstaller
+          pyinstaller app.py --onefile --name heic-converter-gui
+        shell: bash
+
+      - name: Rename artifact
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            mv dist/heic-converter-gui.exe heic-converter-gui-windows.exe
+          else
+            mv dist/heic-converter-gui heic-converter-gui-linux
+          fi
+        shell: bash
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }}-binary
+          path: |
+            dist/heic-converter-gui-windows.exe
+            dist/heic-converter-gui-linux
+        if-no-files-found: ignore
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/**/heic-converter-gui-windows.exe
+            artifacts/**/heic-converter-gui-linux
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

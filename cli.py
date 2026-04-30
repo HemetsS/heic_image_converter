@@ -114,12 +114,16 @@ def main(argv: list[str] | None = None) -> int:
         nonlocal final
         final = p
 
-    ConversionJob(items, cfg, on_progress, on_done).run()
-    assert final is not None
-    print(
-        f"\nDone in {format_duration(final.elapsed)}: "
-        f"{final.succeeded} ok, {final.skipped} skipped, {final.failed} failed."
-    )
+    try:
+        ConversionJob(items, cfg, on_progress, on_done).run()
+        assert final is not None
+        print(
+            f"\nDone in {format_duration(final.elapsed)}: "
+            f"{final.succeeded} ok, {final.skipped} skipped, {final.failed} failed."
+        )
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
     return 0 if final.failed == 0 else 3
 
 
