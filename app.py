@@ -55,11 +55,13 @@ STATUS_STYLES: dict[str, str] = {
 
 
 def _make_root() -> tk.Tk:
-    root = tb.Window(themename=DEFAULT_THEME)
-    try:
-        TkinterDnD._require(root)  # type: ignore[attr-defined]
-    except Exception:  # noqa: BLE001
-        pass
+    # Use TkinterDnD.Tk as the root window for drag & drop support
+    root = TkinterDnD.Tk()
+    # Apply ttkbootstrap theme manually
+    style = tb.Style(DEFAULT_THEME)
+    root.style = style  # Attach for later use if needed
+    # Set window background to match theme
+    root.configure(bg=style.colors.bg)
     return root
 
 
@@ -214,7 +216,7 @@ class HeicConverterApp:
 
     # ------------------------------------------------------------------ Cards
     def _build_source_card(self, parent: tk.Misc) -> ttk.Frame:
-        card = _card(parent, "1 · Source", "drag & drop files or folders here")
+        card = _card(parent, "1 · Source")
         body: ttk.Frame = card.body  # type: ignore[attr-defined]
 
         self.source_var = tk.StringVar()
@@ -232,6 +234,10 @@ class HeicConverterApp:
         ttk.Button(
             row, text="🔍  Scan", command=self._scan, bootstyle=PRIMARY,
         ).pack(side="left", padx=(8, 0))
+
+        # Info text for drag & drop
+        info = ttk.Label(body, text="Tip: You can also drag & drop files or folders anywhere onto this window.", bootstyle="secondary")
+        info.pack(fill="x", pady=(8, 0))
         return card
 
     def _build_files_card(self, parent: tk.Misc) -> ttk.Frame:
@@ -315,7 +321,7 @@ class HeicConverterApp:
 
         # --- Tab: Output --------------------------------------------------
         tab_out = ttk.Frame(nb, padding=12)
-        nb.add(tab_out, text="  Output  ")
+        nb.add(tab_out, text="  Settings  ")
 
         ttk.Label(tab_out, text="Format").grid(row=0, column=0, sticky="w", pady=(0, 4))
         self.format_var = tk.StringVar(value=list(SUPPORTED_FORMATS.keys())[0])
@@ -376,7 +382,11 @@ class HeicConverterApp:
         self.conflict_var = tk.StringVar(value=ConflictPolicy.SKIP.value)
         ttk.Combobox(
             tab_feat, textvariable=self.conflict_var, state="readonly",
-            values=[p.value for p in ConflictPolicy],
+            values=[
+                "skip (use hash cache, skip already-converted)",
+                "overwrite (always overwrite, ignore hash cache)",
+                "rename (always rename, ignore hash cache)"
+            ],
         ).grid(row=1, column=0, sticky="we", pady=(0, 10), padx=(0, 8))
 
         ttk.Label(tab_feat, text="Parallel workers").grid(row=0, column=1, sticky="w", pady=(0, 4))
@@ -391,7 +401,6 @@ class HeicConverterApp:
         self.rotate_var = tk.BooleanVar(value=True)
         self.organize_var = tk.BooleanVar(value=False)
         self.verify_var = tk.BooleanVar(value=True)
-        self.cache_var = tk.BooleanVar(value=True)
         self.dryrun_var = tk.BooleanVar(value=False)
         self.log_var = tk.BooleanVar(value=True)
 
@@ -400,7 +409,6 @@ class HeicConverterApp:
             ("Auto-rotate (EXIF orientation)", self.rotate_var),
             ("Organize by capture date (YYYY/YYYY-MM-DD/)", self.organize_var),
             ("Verify after writing", self.verify_var),
-            ("Hash cache (skip already-converted)", self.cache_var),
             ("Dry run (don't write any files)", self.dryrun_var),
             ("Write conversion-log.txt", self.log_var),
         ]
@@ -491,8 +499,13 @@ class HeicConverterApp:
                 buf += ch
         if buf:
             paths.append(buf)
+        # Append to existing list, avoid duplicates
         if paths:
-            self.source_var.set(";".join(paths))
+            current = self.source_var.get().strip()
+            current_paths = set(p for p in current.split(";") if p)
+            for p in paths:
+                current_paths.add(p)
+            self.source_var.set(";".join(current_paths))
             self._scan()
 
     # ------------------------------------------------------------------ Pickers
@@ -500,6 +513,7 @@ class HeicConverterApp:
         path = filedialog.askdirectory(title="Pick folder to scan")
         if path:
             self.source_var.set(path)
+            self._scan()
 
     def _pick_files(self) -> None:
         files = filedialog.askopenfilenames(
@@ -507,7 +521,12 @@ class HeicConverterApp:
             filetypes=[("HEIC images", "*.heic *.HEIC *.heif *.HEIF"), ("All files", "*.*")],
         )
         if files:
-            self.source_var.set(";".join(files))
+            current = self.source_var.get().strip()
+            current_paths = set(p for p in current.split(";") if p)
+            for f in files:
+                current_paths.add(f)
+            self.source_var.set(";".join(current_paths))
+            self._scan()
 
     def _pick_output(self) -> None:
         p = filedialog.askdirectory(title="Pick output folder")
@@ -666,6 +685,18 @@ class HeicConverterApp:
                 messagebox.showerror("Output folder error", str(e))
                 return
 
+        # Map UI string to ConflictPolicy and hash cache usage
+        conflict_str = self.conflict_var.get()
+        if conflict_str.startswith("skip"):
+            conflict_policy = ConflictPolicy.SKIP
+            use_hash_cache = True
+        elif conflict_str.startswith("overwrite"):
+            conflict_policy = ConflictPolicy.OVERWRITE
+            use_hash_cache = False
+        else:
+            conflict_policy = ConflictPolicy.RENAME
+            use_hash_cache = False
+
         cfg = ConverterConfig(
             output_format_label=self.format_var.get(),
             output_mode=mode,
@@ -675,8 +706,8 @@ class HeicConverterApp:
             auto_rotate=self.rotate_var.get(),
             organize_by_date=self.organize_var.get(),
             verify_after=self.verify_var.get(),
-            use_hash_cache=self.cache_var.get(),
-            conflict_policy=ConflictPolicy(self.conflict_var.get()),
+            use_hash_cache=use_hash_cache,
+            conflict_policy=conflict_policy,
             dry_run=self.dryrun_var.get(),
             write_log=self.log_var.get(),
             workers=int(self.workers_var.get()),
