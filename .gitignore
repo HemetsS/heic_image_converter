@@ -1,0 +1,14 @@
+# uv / virtualenvs
+.venv/
+.uv/
+__pycache__/
+*.pyc
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Conversion sidecars (created at runtime)
+.heic-converter-cache.json
+conversion-log.txt
