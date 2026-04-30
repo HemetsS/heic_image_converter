@@ -59,11 +59,17 @@ jobs:
         with:
           name: heic-converter-gui-linux
           path: artifacts/
+      - name: Rename Linux binary
+        run: mv artifacts/heic-converter-gui artifacts/heic-converter-gui-linux
+        shell: bash
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
           name: heic-converter-gui-windows
           path: artifacts/
+      - name: Rename Windows binary
+        run: mv artifacts/heic-converter-gui.exe artifacts/heic-converter-gui-windows.exe
+        shell: bash
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

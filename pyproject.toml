@@ -1,6 +1,6 @@
 [project]
 name = "heic-image-converter"
-version = "0.3.0"
+version = "1.0.0"
 description = "Cross-platform GUI + CLI tool to convert Apple HEIC/HEIF images to JPEG/PNG/WebP. Originals are never modified."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -11,7 +11,7 @@ classifiers = [
     "Environment :: Win32 (MS Windows)",
     "Environment :: X11 Applications",
     "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: AGPL-3.0-or-later",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3",
