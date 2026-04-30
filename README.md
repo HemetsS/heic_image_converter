@@ -5,6 +5,8 @@ to JPEG, PNG, or WebP.
 
 > **Originals are never modified, moved, or deleted.** The tool only reads them.
 
+![Main GUI](images/app.png)
+
 ## Features
 
 ### Core
@@ -102,12 +104,6 @@ You can also call the module directly: `uv run python cli.py …`.
 - [converter.py](converter.py) — Pure conversion engine (no Tk dependency)
 - [cli.py](cli.py) — Command-line interface using the same engine
 - [pyproject.toml](pyproject.toml) — uv / PEP 621 project metadata + dependencies
-
-## Screenshots
-
-![Main GUI](https://raw.githubusercontent.com/yourusername/heic-image-converter/main/docs/screenshot-main.png)
-
-*Add more screenshots or GIFs to showcase features and UI.*
 
 ## Notes & caveats
 
