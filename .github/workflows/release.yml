@@ -51,7 +51,6 @@ jobs:
           path: |
             dist/heic-converter-gui-windows.exe
             dist/heic-converter-gui-linux
-        if-no-files-found: ignore
 
   release:
     needs: build
