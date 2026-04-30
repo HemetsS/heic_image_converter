@@ -45,7 +45,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install build tools
-        run: pip install uv hatchling
+        run: pip install uv hatchling build
       - name: Build wheel
         run: uv pip install --system . && python -m build --wheel
       - name: Check wheel exists
